@@ -5,8 +5,7 @@ Point bbox_lu ;
 Point bbox_rd ;
 Point bbox_ru ;
 Arc * root = NULL ; // This is beachline head pointer
-vector<Event> Event_queue ;  // global event_queue  
-vector<Seg> Output ; // global Output vector
+
 
 void test_class() ;
 void Voronoi(vector<Point> site_list, Point bb_point, Point bb_point2) ;
@@ -19,37 +18,41 @@ Point intersection(Point p0, Point p1, double l) ;
 void checkcircle(Arc * arc, double beachline) ; 
 double findcircle(double x1, double y1, double x2, double y2, double x3, double y3, Point & centre) ;
 void finish_edges() ;
+void modify_edge() ;
+bool reserve(Point start, Point end, Point & p1, int & type) ;
+bool reset_seg(Point start, Point end, Point & p1, Point & p2) ; 
 void debug_linklist() ;
 void print_point(Point p, string str);
 void debug_output() ;
+vector<Seg> debug_returnOutput() ;
 
-int main() {
-  // test_class() ;
-  double x ;
-  double y ;
-  int count = 0 ;
-  int most = 0 ;
-  cout << "count:";
-  cin >> most ;
-  Point s, b, input; 
-  s.x() = 0 ; 
-  s.y() = 0 ; 
-  b.x() = 6 ; 
-  b.y() = 6 ;
-  vector<Point> q ;
-  while( cin >> x >> y ) {
-    input.x() = x ;
-    input.y() = y ;
-    q.push_back(input) ;
-    count ++ ;
-    if ( count >= most )
-      break ;
-  } // while
+// int main() {
+//   // test_class() ;
+//   double x ;
+//   double y ;
+//   int count = 0 ;
+//   int most = 0 ;
+//   cout << "count:";
+//   cin >> most ;
+//   Point s, b, input; 
+//   s.x() = 0 ; 
+//   s.y() = 0 ; 
+//   b.x() = 6 ; 
+//   b.y() = 6 ;
+//   vector<Point> q ;
+//   while( cin >> x >> y ) {
+//     input.x() = x ;
+//     input.y() = y ;
+//     q.push_back(input) ;
+//     count ++ ;
+//     if ( count >= most )
+//       break ;
+//   } // while
   
-  Voronoi(q, s, b) ; 
-  //check_linklist() ;
-  return 0 ;
-} // main()
+//   Voronoi(q, s, b) ; 
+//   //check_linklist() ;
+//   return 0 ;
+// } // main()
 
 void test_class() {
   cout << "Just for test !" << endl ;
@@ -81,6 +84,7 @@ void test_class() {
 void Voronoi( vector<Point> site_list, Point bb_point1, Point bb_point2 ) {
   Event_queue.clear() ;
   Output.clear() ;
+  root = NULL ;
   Event temp ;
   for( size_t i = 0 ; i < site_list.size() ; i++ ) {
     temp.pos() = site_list[i] ;
@@ -98,6 +102,7 @@ void Voronoi( vector<Point> site_list, Point bb_point1, Point bb_point2 ) {
 
   // execute Fortune algorithm
   Fortune() ;
+  modify_edge() ; 
   debug_output() ;
 
 } // voronoi()
@@ -112,10 +117,10 @@ void Fortune() {
       handle_site(now_event) ;
     else
       handle_circle(now_event) ;
-    debug_linklist() ;
+    //debug_linklist() ;
   } // while
 
-  finish_edges() ;
+  //finish_edges() ;
 
 } // Fortune()
 
@@ -175,7 +180,7 @@ void handle_site( Event n_event ) {
         arc_ptr->left_seg() = *seg_ptr  ;
         arc_ptr->right_seg() = *seg_ptr ;
         // To prevent memory leak 
-        //delete seg_ptr ;
+        delete seg_ptr ;
         // Put new arc into beachline
         arc_ptr->next = temp->next ; 
         arc_ptr->prev = temp ; 
@@ -211,7 +216,7 @@ void handle_site( Event n_event ) {
     seg_ptr = new Seg(start) ;
     rightmost->right_seg() = *seg_ptr ;
     rightmost->next->left_seg() = *seg_ptr ;
-    //delete seg_ptr ; 
+    delete seg_ptr ; 
     return ;
   } // else
 
@@ -290,17 +295,17 @@ void handle_circle(Event n_event) {
   rm_ptr->left_seg().finish(n_event.circle_centre()) ;
   rm_ptr->right_seg().finish(n_event.circle_centre()) ;
   
-  // Put in the output vector
-  Seg temp = rm_ptr->left_seg() ;
-  Output.push_back(temp) ;
-  temp = rm_ptr->right_seg() ;
-  Output.push_back(temp) ;
+  // // Put in the output vector
+  // Seg temp = rm_ptr->left_seg() ;
+  // //Output.push_back(temp) ;
+  // temp = rm_ptr->right_seg() ;
+  // Output.push_back(temp) ;
 
   // To recover remain arc's left and right seg
   Seg * temp_seg = new Seg(n_event.circle_centre()) ;
   rm_ptr->prev->right_seg() = *temp_seg ;
   rm_ptr->next->left_seg() = *temp_seg ;
-  //delete temp_seg ;
+  delete temp_seg ;
   //cout << "handle_circle()" << endl ;
   // Check another circle event
   checkcircle(rm_ptr->prev, n_event.pos().y()) ;
@@ -329,9 +334,9 @@ void checkcircle(Arc * arc, double beachline) {
     //print_point(p2, "Three point in a line!") ;
     return ; // Points in a line
   } // if 
-  print_point(p1, "p1:") ;
-  print_point(p2, "p2:") ;
-  print_point(p3, "p3:") ;
+  // print_point(p1, "p1:") ;
+  // print_point(p2, "p2:") ;
+  // print_point(p3, "p3:") ;
   //cout << "beachline:" << beachline << endl ;
   double radius = findcircle(p1.x(), p1.y(), p2.x(), p2.y(), p3.x(), p3.y(), center) ;
   //cout << "radius:" << radius << endl ;
@@ -339,11 +344,12 @@ void checkcircle(Arc * arc, double beachline) {
     // There is a circle event!
     Event * event = new Event() ;
     event->pos().x() = 0 ; // Useless, won't use at circle event 
-    cout << "check this number:" << center.y() - radius << endl ;
+    //cout << "check this number:" << center.y() - radius << endl ;
     event->pos().y() = center.y() - radius ;
     event->arc = arc ;
     event->type() = "circle" ;
     event->circle_centre() = center ;
+    print_point(center, "circle:") ;
     event->valid() = true ;
     arc->event = event ;
     Event_queue.push_back(*event) ;
@@ -396,7 +402,7 @@ double findcircle(double x1, double y1, double x2, double y2, double x3, double 
     // Set the centre point 
     centre.x() = h ;
     centre.y() = k ;
-    print_point(centre, "circle") ;
+    //print_point(centre, "circle") ;
     // r is the radius
     double r = sqrt(sqr_of_r);
     return r ;
@@ -405,15 +411,113 @@ double findcircle(double x1, double y1, double x2, double y2, double x3, double 
 
 void finish_edges() {
    // Advance the sweep line so no parabolas can cross the bounding box.
-   double beachline = bbox_ru.y() / 2 ; 
+   double beachline = bbox_ru.y() / 2  ; 
 
    // Extend each remaining segment to the new parabola intersections.
    for (Arc *i = root; i->next; i = i->next)
-      if (i->right_seg().done == false ) {
+      if (i->right_seg().done == false ) 
         i->right_seg().finish(intersection(i->site(), i->next->site(), -beachline));
-        Output.push_back(i->right_seg()) ;
-      } // if    
+        // Output.push_back(i->right_seg()) ;
+   
 } // finish_edge
+
+void modify_edge() {
+  Point new_start ;
+  Point new_end ;
+  Point reserve_point ;
+  int type_num = 0 ; 
+  bool is_reserve = false ;
+  vector<size_t> vec ;
+  size_t i ; 
+  for ( i = 0 ; i < Output.size() ; i++ ) {
+    if ( Output[i].start().x() > bbox_ru.x() || Output[i].start().x() < bbox_ld.x()
+         || Output[i].start().y() > bbox_ru.y() || Output[i].start().y() < bbox_ld.y()
+         || Output[i].end().x() > bbox_ru.x() || Output[i].end().x() < bbox_ld.x()
+         || Output[i].end().y() > bbox_ru.y() || Output[i].end().y() < bbox_ld.y() ) {
+      // TODO origin fit point don't need to change!
+      is_reserve = reserve(Output[i].start(), Output[i].end(), reserve_point, type_num) ; 
+      if ( reset_seg(Output[i].start(), Output[i].end(), new_start, new_end) ) {
+        Output[i].start() = new_start ;
+        Output[i].end() = new_end ;
+        if ( is_reserve ) {
+          // print_point(reserve_point, "reserve:") ;
+          if ( type_num == 1 )
+            Output[i].start() = reserve_point ;
+          else if ( type_num == 2 )
+            Output[i].end() = reserve_point ;
+          else 
+            ;
+        } // if 
+           
+      } // if 
+      else 
+        vec.push_back(i) ;
+    } // if 
+  } // for 
+ 
+  for ( size_t j = 0 ; j < vec.size() ; j++ )
+    Output.erase(Output.begin()+vec[i]) ;
+
+} // modify_edge()
+
+bool reserve(Point start, Point end, Point & p1, int & type) {
+  if ( start.x() <= bbox_ru.x() && start.x() >= bbox_ld.x() 
+       && start.y() <= bbox_ru.y() && start.y() >= bbox_ld.y() ) {
+    p1 = start ;
+    type = 1 ;
+    return true ;
+  } // if 
+  else if ( end.x() <= bbox_ru.x() && end.x() >= bbox_ld.x() 
+            && end.y() <= bbox_ru.y() && end.y() >= bbox_ld.y() ) {
+    p1 = end ;
+    type = 2 ;
+    return true ;
+  } // if   
+  else 
+    return false ;
+} // reserve()
+
+bool reset_seg(Point start, Point end, Point & p1, Point & p2) {
+  double m = (start.y() - end.y()) / (start.x() - end.x()) ;
+  double ans_x1, ans_x2 ;
+  double ans_y1, ans_y2 ;
+  vector<Point> vec ;
+  ans_y1 = m*bbox_ld.x() - m*start.x() + start.y() ;
+  ans_y2 = m*bbox_ru.x() - m*start.x() + start.y() ;
+  ans_x1 = ((bbox_ld.y() - start.y()) / m) + start.x() ; 
+  ans_x2 = ((bbox_ru.y() - start.y()) / m) + start.x() ; 
+  if ( ans_y1 >= -10e-6 && ans_y1 <= 10e-6 )
+    ans_y1 = 0 ;
+  if ( ans_y2 >= -10e-6 && ans_y2 <= 10e-6 )
+    ans_y2 = 0 ;
+  if ( ans_x1 >= -10e-6 && ans_x1 <= 10e-6 )
+    ans_x1 = 0 ;
+  if ( ans_x2 >= -10e-6 && ans_x2 <= 10e-6 )
+    ans_x2 = 0 ;  
+
+  if ( ans_y1 >= bbox_ld.y() && ans_y1 <= bbox_ru.y() )
+    vec.push_back(Point(bbox_ld.x(), ans_y1)) ;
+  if ( ans_y2 >= bbox_ld.y() && ans_y2 <= bbox_ru.y() )
+    vec.push_back(Point(bbox_ru.x(), ans_y2)) ;
+  if ( ans_x1 >= bbox_ld.x() && ans_x1 <= bbox_ru.x() )
+    vec.push_back(Point(ans_x1,bbox_ld.y())) ;
+  if ( ans_x2 >= bbox_ld.x() && ans_x2 <= bbox_ru.x() )
+    vec.push_back(Point(ans_x2,bbox_ru.y())) ;
+
+  if ( vec.size() == 2 ) {
+    p1 = vec[0] ;
+    p2 = vec[1] ;
+    return true ;
+  } // if
+  else if ( vec.size() == 4 ) {
+    p1 = vec[0] ;
+    p2 = vec[1] ;
+    return true ;
+  } // else if 
+  else 
+    return false ;
+  
+} // reset_seg()
 
 void print_point(Point p, string str) {
 
@@ -436,3 +540,22 @@ void debug_output() {
   } // for 
 
 } // debug_output
+
+vector<Seg> debug_returnOutput() {
+  return Output ;
+} // debug_returnOutput()
+
+PYBIND11_MODULE(_Voronoi, m){
+    m.doc() = "pybind11 Voronoi";
+    m.def("Voronoi", &Voronoi);
+    m.def("Output", &debug_returnOutput);
+    pybind11::class_<Point>(m, "Point")
+        .def( pybind11::init<double, double>()) 
+        .def_property_readonly("x", [](const Point &p) { return p.x(); })
+        .def_property_readonly("y", [](const Point &p) { return p.y(); }) ;
+    pybind11::class_<Seg>(m, "Seg")
+        .def( pybind11::init<>()) 
+        .def_property_readonly("start", [](const Seg &s) { return s.start(); })
+        .def_property_readonly("end", [](const Seg &s) { return s.end(); }) ;
+
+}

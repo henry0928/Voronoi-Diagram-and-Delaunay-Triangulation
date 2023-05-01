@@ -2,10 +2,15 @@
 #include <vector>
 #include <queue>
 #include <math.h>
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 using namespace std ;
-class Arg;
-class Event;
+class Seg ;
+class Arg ;
+class Event ;
+vector<Event> Event_queue ;  // global event_queue  
+vector<Seg> Output ; // global Output vector
 
 class Point {
   private:
@@ -22,8 +27,10 @@ class Point {
     } // copy assignment constructor  
     double & x() { return _x ; }
     const double & x() const { return _x ; } 
+    const double & return_x() const { return _x ; } 
     double & y() { return _y ; }
     const double & y() const { return _y ; } 
+    const double & return_y() const { return _y ; } 
 }; 
 
 class Seg {
@@ -45,11 +52,14 @@ class Seg {
     } // copy assignment constructor  
     const Point & start() const { return _start ;}
     Point & start() { return _start ;}
+    const Point & return_start() const { return _start ;}
     const Point & end() const { return _end ;}
+    const Point & return_end() const { return _end ;}
     Point & end() { return _end ;}
     void finish(Point p) {
       _end = p ;
       done = true ;
+      Output.push_back(*this) ;
     } // finish()
 
 } ; 
