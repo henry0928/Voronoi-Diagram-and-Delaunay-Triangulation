@@ -17,42 +17,17 @@ bool intersect(Point new_site, Arc * arc, Point & res_point);
 Point intersection(Point p0, Point p1, double l) ;
 void checkcircle(Arc * arc, double beachline) ; 
 double findcircle(double x1, double y1, double x2, double y2, double x3, double y3, Point & centre) ;
+bool check_invalid_circle(Point p1) ;
 void finish_edges() ;
 void modify_edge() ;
 bool reserve(Point start, Point end, Point & p1, int & type) ;
-bool reset_seg(Point start, Point end, Point & p1, Point & p2) ; 
+bool reset_seg(Point start, Point end, Point & p1, Point & p2) ;
+bool violate(Point p) ;
+Point closet_point(Point pt, Point p1, Point p2) ; 
 void debug_linklist() ;
 void print_point(Point p, string str);
 void debug_output() ;
 vector<Seg> debug_returnOutput() ;
-
-// int main() {
-//   // test_class() ;
-//   double x ;
-//   double y ;
-//   int count = 0 ;
-//   int most = 0 ;
-//   cout << "count:";
-//   cin >> most ;
-//   Point s, b, input; 
-//   s.x() = 0 ; 
-//   s.y() = 0 ; 
-//   b.x() = 6 ; 
-//   b.y() = 6 ;
-//   vector<Point> q ;
-//   while( cin >> x >> y ) {
-//     input.x() = x ;
-//     input.y() = y ;
-//     q.push_back(input) ;
-//     count ++ ;
-//     if ( count >= most )
-//       break ;
-//   } // while
-  
-//   Voronoi(q, s, b) ; 
-//   //check_linklist() ;
-//   return 0 ;
-// } // main()
 
 void test_class() {
   cout << "Just for test !" << endl ;
@@ -84,6 +59,7 @@ void test_class() {
 void Voronoi( vector<Point> site_list, Point bb_point1, Point bb_point2 ) {
   Event_queue.clear() ;
   Output.clear() ;
+  invalid_circle.clear() ;
   root = NULL ;
   Event temp ;
   for( size_t i = 0 ; i < site_list.size() ; i++ ) {
@@ -120,7 +96,7 @@ void Fortune() {
     //debug_linklist() ;
   } // while
 
-  //finish_edges() ;
+  finish_edges() ;
 
 } // Fortune()
 
@@ -243,7 +219,7 @@ bool intersect( Point new_site, Arc * arc, Point & res_point ) {
     return true;
   } // if 
   else {
-    print_point(arc->site(), "need to be false") ;
+    //print_point(arc->site(), "need to be false") ;
     return false ;
   } // else   
   
@@ -276,7 +252,7 @@ Point intersection(Point p0, Point p1, double l) {
     double c = (p0.y()*p0.y() + p0.x()*p0.x() - l*l)/z0
                 - (p1.y()*p1.y() + p1.x()*p1.x() - l*l)/z1;
     //res.y = ( -b - sqrt(b*b - 4*a*c) ) / (2*a);
-    res.x() = ( -b - sqrt(b*b - 4*a*c) ) / (2*a);
+    res.x() = ( -b + sqrt(b*b - 4*a*c) ) / (2*a);
   } // else
 
   //res.x = (p.x*p.x + (p.y-res.y)*(p.y-res.y) - l*l)/(2*p.x-2*l);
@@ -285,7 +261,10 @@ Point intersection(Point p0, Point p1, double l) {
 } // intersection()
 
 void handle_circle(Event n_event) {
-  //cout << "handle_circle function()" << endl ; 
+  if ( check_invalid_circle(n_event.circle_centre()) ) {
+    cout << "here!" << endl ;
+    return ;
+  } // if 
   // Remove the arc from the beachline
   Arc * rm_ptr = n_event.arc ;
   rm_ptr->prev->next = rm_ptr->next ;
@@ -316,11 +295,29 @@ void handle_circle(Event n_event) {
 
 } // handle_circle()
 
+bool check_invalid_circle(Point p1) {
+  for ( size_t i = 0 ; i < invalid_circle.size() ; i++ ) {
+    if ( invalid_circle[i] == p1 )
+      return true ;
+  } // for
+
+  return false ; 
+
+} // check_invalid_circle()
+
 void checkcircle(Arc * arc, double beachline) {
-  if ( !arc->prev || !arc->next ) {
-    //print_point(arc->site(), "Don't have three arc!") ;
+  if ( arc->event && arc->event->pos().y() != beachline ) {
+      // cout << "valid here!" << endl ;
+      print_point(arc->event->circle_centre(), "valid centre") ;
+      invalid_circle.push_back(arc->event->circle_centre()) ;
+      // arc->event->valid() = false;
+  } // if    
+  arc->event = NULL;
+
+  if ( !arc->prev || !arc->next )
     return ;
-  } // if
+  if ( arc->prev == arc->next )
+    return ;
   
   Point p1 = arc->prev->site() ;
   Point p2 = arc->site() ;
@@ -331,16 +328,12 @@ void checkcircle(Arc * arc, double beachline) {
   double y23 = p2.y() - p3.y() ;
   double x31 = p3.x() - p1.x() ; 
   if ( (y23 * x31) - (y31 * x23) <= 0 ) {
-    //print_point(p2, "Three point in a line!") ;
     return ; // Points in a line
   } // if 
-  // print_point(p1, "p1:") ;
-  // print_point(p2, "p2:") ;
-  // print_point(p3, "p3:") ;
-  //cout << "beachline:" << beachline << endl ;
+  
   double radius = findcircle(p1.x(), p1.y(), p2.x(), p2.y(), p3.x(), p3.y(), center) ;
-  //cout << "radius:" << radius << endl ;
-  if ( center.y() - radius <= beachline ) {
+
+  if ( (center.y() - radius) <= beachline && (center.y() - radius) >= bbox_ld.y()) {
     // There is a circle event!
     Event * event = new Event() ;
     event->pos().x() = 0 ; // Useless, won't use at circle event 
@@ -349,7 +342,13 @@ void checkcircle(Arc * arc, double beachline) {
     event->arc = arc ;
     event->type() = "circle" ;
     event->circle_centre() = center ;
+    // print_point(arc->prev->site(), "prev:") ;
+    // print_point(arc->site(), "now:") ;
+    // print_point(arc->next->site(), "next:") ;
+    // debug_linklist() ;
     print_point(center, "circle:") ;
+    // cout << event->pos().y() << endl ;
+    // cout << endl ;
     event->valid() = true ;
     arc->event = event ;
     Event_queue.push_back(*event) ;
@@ -411,13 +410,13 @@ double findcircle(double x1, double y1, double x2, double y2, double x3, double 
 
 void finish_edges() {
    // Advance the sweep line so no parabolas can cross the bounding box.
-   double beachline = bbox_ru.y() / 2  ; 
+   double beachline = bbox_ru.y() / 10  ; 
 
    // Extend each remaining segment to the new parabola intersections.
-   for (Arc *i = root; i->next; i = i->next)
-      if (i->right_seg().done == false ) 
+   for (Arc *i = root ; i->next ; i = i->next)
+      if (i->right_seg().done == false) { 
         i->right_seg().finish(intersection(i->site(), i->next->site(), -beachline));
-        // Output.push_back(i->right_seg()) ;
+      } // if   
    
 } // finish_edge
 
@@ -478,14 +477,28 @@ bool reserve(Point start, Point end, Point & p1, int & type) {
 } // reserve()
 
 bool reset_seg(Point start, Point end, Point & p1, Point & p2) {
-  double m = (start.y() - end.y()) / (start.x() - end.x()) ;
+  double m = 0 ;
+  if ( start.x() != end.x() )
+    m = (start.y() - end.y()) / (start.x() - end.x()) ;
   double ans_x1, ans_x2 ;
   double ans_y1, ans_y2 ;
+  ans_x1 = -1 ;  // for init ans_point
+  ans_x2 = -1 ;
+  ans_y1 = -1 ;
+  ans_y2 = -1 ;
   vector<Point> vec ;
-  ans_y1 = m*bbox_ld.x() - m*start.x() + start.y() ;
-  ans_y2 = m*bbox_ru.x() - m*start.x() + start.y() ;
-  ans_x1 = ((bbox_ld.y() - start.y()) / m) + start.x() ; 
-  ans_x2 = ((bbox_ru.y() - start.y()) / m) + start.x() ; 
+  if ( start.x() != end.x() ) {
+    ans_y1 = m*bbox_ld.x() - m*start.x() + start.y() ;
+    ans_y2 = m*bbox_ru.x() - m*start.x() + start.y() ;
+    ans_x1 = ((bbox_ld.y() - start.y()) / m) + start.x() ; 
+    ans_x2 = ((bbox_ru.y() - start.y()) / m) + start.x() ;
+  } // if
+  else {
+    ans_x1 = bbox_ld.x() ;
+    ans_x2 = bbox_ru.x() ;
+    ans_y1 = -1 ; // just want it become impossible
+    ans_y2 = -1 ;
+  } // else  
   if ( ans_y1 >= -10e-6 && ans_y1 <= 10e-6 )
     ans_y1 = 0 ;
   if ( ans_y2 >= -10e-6 && ans_y2 <= 10e-6 )
@@ -494,7 +507,7 @@ bool reset_seg(Point start, Point end, Point & p1, Point & p2) {
     ans_x1 = 0 ;
   if ( ans_x2 >= -10e-6 && ans_x2 <= 10e-6 )
     ans_x2 = 0 ;  
-
+  
   if ( ans_y1 >= bbox_ld.y() && ans_y1 <= bbox_ru.y() )
     vec.push_back(Point(bbox_ld.x(), ans_y1)) ;
   if ( ans_y2 >= bbox_ld.y() && ans_y2 <= bbox_ru.y() )
@@ -504,20 +517,45 @@ bool reset_seg(Point start, Point end, Point & p1, Point & p2) {
   if ( ans_x2 >= bbox_ld.x() && ans_x2 <= bbox_ru.x() )
     vec.push_back(Point(ans_x2,bbox_ru.y())) ;
 
-  if ( vec.size() == 2 ) {
-    p1 = vec[0] ;
-    p2 = vec[1] ;
+  if ( vec.size() == 2 || vec.size() == 3 || vec.size() == 4 ) {
+    if ( violate(start) && violate(end) ) {
+      // p1 = vec[0] ; // small point
+      // p2 = vec[1] ; // big point
+      return false ;
+    } // if   
+    else if ( violate(start) && !violate(end) ) {
+      p1 = closet_point(start, vec[0], vec[1]) ;
+    } // else if 
+    else if ( !violate(start) && violate(end) ) {
+      p2 = closet_point(end, vec[0], vec[1]) ;
+    } // else if
+    else
+      cout << "fuck you!" << endl ;
+
     return true ;
   } // if
-  else if ( vec.size() == 4 ) {
-    p1 = vec[0] ;
-    p2 = vec[1] ;
-    return true ;
-  } // else if 
   else 
     return false ;
   
 } // reset_seg()
+
+bool violate(Point p) {
+  if ( p.x() > bbox_ru.x() || p.x() < bbox_ld.x() || p.y() > bbox_ru.y() 
+       || p.y() < bbox_ld.y() )
+    return true ;
+  else 
+    return false ;
+
+} // violate()
+
+Point closet_point(Point pt, Point p1, Point p2) {
+  double dis1 = (pt.x() - p1.x()) * (pt.x() - p1.x()) + (pt.y() - p1.y()) * (pt.y() - p1.y()) ;
+  double dis2 = (pt.x() - p2.x()) * (pt.x() - p2.x()) + (pt.y() - p2.y()) * (pt.y() - p2.y()) ;
+  if ( dis1 > dis2 ) 
+    return p2 ;
+  else 
+    return p1 ;
+} // closet_point()
 
 void print_point(Point p, string str) {
 

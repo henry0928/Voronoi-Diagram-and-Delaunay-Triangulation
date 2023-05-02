@@ -6,11 +6,13 @@
 #include <pybind11/stl.h>
 
 using namespace std ;
+class Point ;
 class Seg ;
 class Arg ;
 class Event ;
 vector<Event> Event_queue ;  // global event_queue  
 vector<Seg> Output ; // global Output vector
+vector<Point> invalid_circle ;
 
 class Point {
   private:
@@ -24,7 +26,13 @@ class Point {
       _x = other.x() ;
       _y = other.y() ;
       return *this ;
-    } // copy assignment constructor  
+    } // copy assignment constructor 
+    bool operator==( const Point & other ) {
+      if ( other.x() == this->x() && other.y() == this->y() )
+        return true ;
+      else
+        return false ;
+    } // equal()
     double & x() { return _x ; }
     const double & x() const { return _x ; } 
     const double & return_x() const { return _x ; } 
