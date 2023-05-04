@@ -410,7 +410,7 @@ double findcircle(double x1, double y1, double x2, double y2, double x3, double 
 
 void finish_edges() {
    // Advance the sweep line so no parabolas can cross the bounding box.
-   double beachline = bbox_ru.y() / 10  ; 
+   double beachline = bbox_ru.y() / 4  ; 
 
    // Extend each remaining segment to the new parabola intersections.
    for (Arc *i = root ; i->next ; i = i->next)
@@ -450,12 +450,12 @@ void modify_edge() {
            
       } // if 
       else 
-        vec.push_back(i) ;
+        Output[i].done = false ;
     } // if 
   } // for 
  
-  for ( size_t j = 0 ; j < vec.size() ; j++ )
-    Output.erase(Output.begin()+vec[i]) ;
+  // for ( size_t j = 0 ; j < vec.size() ; j++ )
+  //   Output.erase(Output.begin()+vec[j]) ;
 
 } // modify_edge()
 
@@ -519,8 +519,8 @@ bool reset_seg(Point start, Point end, Point & p1, Point & p2) {
 
   if ( vec.size() == 2 || vec.size() == 3 || vec.size() == 4 ) {
     if ( violate(start) && violate(end) ) {
-      // p1 = vec[0] ; // small point
-      // p2 = vec[1] ; // big point
+      print_point(start, "debug start:") ;
+      print_point(end, "debug end:") ;
       return false ;
     } // if   
     else if ( violate(start) && !violate(end) ) {
@@ -553,7 +553,7 @@ Point closet_point(Point pt, Point p1, Point p2) {
   double dis2 = (pt.x() - p2.x()) * (pt.x() - p2.x()) + (pt.y() - p2.y()) * (pt.y() - p2.y()) ;
   if ( dis1 > dis2 ) 
     return p2 ;
-  else 
+  else void modify_output() ;
     return p1 ;
 } // closet_point()
 
@@ -580,7 +580,12 @@ void debug_output() {
 } // debug_output
 
 vector<Seg> debug_returnOutput() {
-  return Output ;
+  vector<Seg> answer ;
+  for ( size_t i = 0 ; i < Output.size() ; i++ ) {
+    if ( Output[i].done == true )
+      answer.push_back(Output[i]) ;
+  } // for
+  return answer ;
 } // debug_returnOutput()
 
 PYBIND11_MODULE(_Voronoi, m){
