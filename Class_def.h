@@ -10,9 +10,7 @@ class Point ;
 class Seg ;
 class Arg ;
 class Event ;
-vector<Event> Event_queue ;  // global event_queue  
-vector<Seg> Output ; // global Output vector
-vector<Point> invalid_circle ;
+
 
 class Point {
   private:
@@ -64,10 +62,10 @@ class Seg {
     const Point & end() const { return _end ;}
     const Point & return_end() const { return _end ;}
     Point & end() { return _end ;}
-    void finish(Point p) {
+    void finish(Point p, vector<Seg> & vec) {
       _end = p ;
       done = true ;
-      Output.push_back(*this) ;
+      vec.push_back(*this) ;
     } // finish()
 
 } ; 
