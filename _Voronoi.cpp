@@ -247,7 +247,6 @@ class Voronoi {
 
     void checkcircle(Arc * arc, double beachline) {
       if ( arc->event && arc->event->pos().y() != beachline ) {
-          print_point(arc->event->circle_centre(), "invalid centre") ;
           invalid_circle.push_back(arc->event->circle_centre()) ;
           // arc->event->valid() = false;
       } // if    
@@ -383,7 +382,7 @@ class Voronoi {
         return ; // Points in a line
       } // if 
       
-      double radius = findcircle(p1.x(), p1.y(), p2.x(), p2.y(), p3.x(), p3.y(), center) ;
+      findcircle(p1.x(), p1.y(), p2.x(), p2.y(), p3.x(), p3.y(), center) ;
 
       dc_e.arc = arc ;
       dc_e.circle_centre = center ;
@@ -540,8 +539,8 @@ class Voronoi {
 
       if ( vec.size() == 2 || vec.size() == 3 || vec.size() == 4 ) {
         if ( violate(start) && violate(end) ) {
-          print_point(start, "debug start:") ;
-          print_point(end, "debug end:") ;
+          // print_point(start, "debug start:") ;
+          // print_point(end, "debug end:") ;
           return false ;
         } // if   
         else if ( violate(start) && !violate(end) ) {
