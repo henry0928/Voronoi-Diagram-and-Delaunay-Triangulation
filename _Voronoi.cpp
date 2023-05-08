@@ -6,6 +6,8 @@ class Voronoi {
     vector<Seg> Output ; // voronoi diagram Output vector
     vector<Point> invalid_circle ; // to discard invalid circle
     vector<Seg> answer ; // for after fix Output vector
+    vector<adjacent_info> adj_list ; // for record adjacent infomation
+    vector<Seg> delaunay_edge ;
     Arc * root ; // This is beachline head pointer
     Point bbox_ld ;
     Point bbox_ru ;
@@ -13,11 +15,13 @@ class Voronoi {
   public:
     Voronoi() :root(NULL) {} 
 
-    vector<Seg> Create_graph( vector<Point> site_list, Point bb_point1, Point bb_point2 ) {
+    vector<Seg> Create_voronoi( vector<Point> site_list, Point bb_point1, Point bb_point2 ) {
       Event_queue.clear() ;
       Output.clear() ;
       invalid_circle.clear() ;
       answer.clear() ;
+      adj_list.clear() ;
+      delaunay_edge.clear() ;
       root = NULL ;
       Event temp ;
       for( size_t i = 0 ; i < site_list.size() ; i++ ) {
@@ -42,7 +46,7 @@ class Voronoi {
       debug_output() ;
       return answer ;
 
-    } // Create_graph()
+    } // Create_voronoi()
 
     void Fortune() {
       size_t delete_index = 0 ;
@@ -242,8 +246,7 @@ class Voronoi {
 
     void checkcircle(Arc * arc, double beachline) {
       if ( arc->event && arc->event->pos().y() != beachline ) {
-          // cout << "valid here!" << endl ;
-          print_point(arc->event->circle_centre(), "valid centre") ;
+          print_point(arc->event->circle_centre(), "invalid centre") ;
           invalid_circle.push_back(arc->event->circle_centre()) ;
           // arc->event->valid() = false;
       } // if    
@@ -271,21 +274,25 @@ class Voronoi {
       if ( (center.y() - radius) <= beachline && (center.y() - radius) >= bbox_ld.y()) {
         // There is a circle event!
         Event * event = new Event() ;
+        adjacent_info temp ;
         event->pos().x() = 0 ; // Useless, won't use at circle event 
         //cout << "check this number:" << center.y() - radius << endl ;
         event->pos().y() = center.y() - radius ;
         event->arc = arc ;
         event->type() = "circle" ;
         event->circle_centre() = center ;
-        // print_point(arc->prev->site(), "prev:") ;
-        // print_point(arc->site(), "now:") ;
-        // print_point(arc->next->site(), "next:") ;
-        // debug_linklist() ;
-        // print_point(center, "circle:") ;
-        // cout << event->pos().y() << endl ;
-        // cout << endl ;
         event->valid() = true ;
         arc->event = event ;
+
+        // to record adjacent_info
+        temp.p1 = p1 ;
+        temp.p2 = p2 ;
+        temp.p3 = p3 ;
+        temp.centre = center ;
+        temp.valid = true ;
+        temp.third = true ;
+        adj_list.push_back(temp) ;
+        
         Event_queue.push_back(*event) ;
       } // if
 
@@ -356,11 +363,16 @@ class Voronoi {
     void finish_edges() {
       // Advance the sweep line so no parabolas can cross the bounding box.
       double beachline = bbox_ru.y() / 4  ; 
-
+      adjacent_info temp ;
       // Extend each remaining segment to the new parabola intersections.
       for (Arc *i = root ; i->next ; i = i->next)
           if (i->right_seg().done == false) { 
             i->right_seg().finish(intersection(i->site(), i->next->site(), -beachline), Output);
+            temp.p1 = i->site() ;
+            temp.p2 = i->next->site() ;
+            temp.valid = true ;
+            temp.third = false ;
+            adj_list.push_back(temp) ;
           } // if   
       
     } // finish_edge()
@@ -497,6 +509,42 @@ class Voronoi {
         return p1 ;
     } // closet_point()
 
+    vector<Seg> Create_delaunay() {
+      for ( size_t i = 0 ; i < adj_list.size() ; i++ ) {
+        if ( adj_list[i].third )
+          check_invalid_adj(adj_list[i].centre, i) ;
+      } // for
+      
+      for ( size_t j = 0 ; j < adj_list.size() ; j++ ) {
+        if ( adj_list[j].valid ) {
+          if ( adj_list[j].third ) { // need to genarate three seg
+            delaunay_edge.push_back(genarate_seg(adj_list[j].p1, adj_list[j].p2)) ;
+            delaunay_edge.push_back(genarate_seg(adj_list[j].p1, adj_list[j].p3)) ;
+            delaunay_edge.push_back(genarate_seg(adj_list[j].p2, adj_list[j].p3)) ;
+          } // if 
+          else
+            delaunay_edge.push_back(genarate_seg(adj_list[j].p1, adj_list[j].p2)) ;
+        } // if
+      } // for
+
+      return delaunay_edge ;
+    } // Create_delaunay()
+
+    void check_invalid_adj(Point p1, size_t index) {
+      for ( size_t i = 0 ; i < invalid_circle.size() ; i++ ) {
+        if ( invalid_circle[i] == p1 )
+          adj_list[index].valid = false ;
+      } // for
+
+    } // check_invalid_adj()
+
+    Seg genarate_seg(Point p1, Point p2) {
+      Seg seg ;
+      seg.start() = p1 ;
+      seg.end() = p2 ;
+      return seg ;
+    } // generate_seg()
+
     void debug_linklist() {
       Arc * temp = root ;
       while (temp) {
@@ -533,6 +581,7 @@ PYBIND11_MODULE(_Voronoi, m){
         .def_property_readonly("end", [](const Seg &s) { return s.end(); }) ;
     pybind11::class_<Voronoi>(m, "Voronoi")
         .def( pybind11::init<>())
-        .def( "Create_graph", &Voronoi::Create_graph ) ;
+        .def( "Create_voronoi", &Voronoi::Create_voronoi )
+        .def( "Create_delaunay", &Voronoi::Create_delaunay ) ;
 
 }

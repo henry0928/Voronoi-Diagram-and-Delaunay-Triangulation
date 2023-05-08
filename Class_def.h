@@ -60,8 +60,8 @@ class Seg {
     Point & start() { return _start ;}
     const Point & return_start() const { return _start ;}
     const Point & end() const { return _end ;}
-    const Point & return_end() const { return _end ;}
     Point & end() { return _end ;}
+    const Point & return_end() const { return _end ;}
     void finish(Point p, vector<Seg> & vec) {
       _end = p ;
       done = true ;
@@ -119,4 +119,13 @@ class Event {
     bool & valid() {return _valid ;} 
     const bool valid() const {return _valid ;}
 
+};
+
+struct adjacent_info {
+  Point p1 ;
+  Point p2 ;
+  Point p3 ;
+  Point centre ;
+  bool valid ;
+  bool third ;
 };
