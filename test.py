@@ -138,11 +138,8 @@ if __name__== '__main__':
     list3 = setup_list3()
     # bbox_1 = _Voronoi.Point(0,0)
     # bbox_2 = _Voronoi.Point(30,30)
-    # edge_list = Create_diagram(list1, bbox_1, bbox_2)
     # bbox_1 = _Voronoi.Point(0,0)
     # bbox_2 = _Voronoi.Point(20,20)
-    # edge_list = Create_diagram(list2, bbox_1, bbox_2)
-    # Draw_diagram2(edge_list)
     bbox_1 = _Voronoi.Point(0,0)
     bbox_2 = _Voronoi.Point(40,40)
     my_diagram = _Voronoi.Voronoi()
@@ -150,13 +147,11 @@ if __name__== '__main__':
     Draw_diagram3(voronoi)
     delaunay = my_diagram.Create_delaunay()
     Draw_diagram3(delaunay)
-    # points = np.array([[4,33],[10,27],[15,15],[21,30],[29,12],
-    #                    [34,8],[39,36],[25,20],[7,5],[18,11]])
-    # tri = Delaunay(points)
-    # plt.triplot(points[:,0], points[:,1], tri.simplices)
-    # plt.show()
-    # edge_list = Create_diagram(list3, bbox_1, bbox_2)
-    # Draw_diagram3(edge_list)
+    points = np.array([[4,33],[10,27],[15,15],[21,30],[29,12],
+                       [34,8],[39,36],[25,20],[7,5],[18,11]])
+    tri = Delaunay(points)
+    plt.triplot(points[:,0], points[:,1], tri.simplices)
+    plt.show()
 
 
     # test1

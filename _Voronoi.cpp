@@ -8,6 +8,7 @@ class Voronoi {
     vector<Seg> answer ; // for after fix Output vector
     vector<adjacent_info> adj_list ; // for record adjacent infomation
     vector<Seg> delaunay_edge ;
+    vector<delaunay_circle_event> dc_event ; // for record delaunay circle event
     Arc * root ; // This is beachline head pointer
     Point bbox_ld ;
     Point bbox_ru ;
@@ -43,7 +44,7 @@ class Voronoi {
           answer.push_back(Output[i]) ;
       } // for
 
-      debug_output() ;
+      // debug_output() ;
       return answer ;
 
     } // Create_voronoi()
@@ -360,20 +361,86 @@ class Voronoi {
 
     } // check_invalid_circle()
 
+    void find_rest_cricle(Arc * arc, double beachline) {
+      // adjacent_info temp ;
+      delaunay_circle_event dc_e ; 
+      arc->event = NULL;
+
+      if ( !arc->prev || !arc->next )
+        return ;
+      if ( arc->prev == arc->next )
+        return ;
+      
+      Point p1 = arc->prev->site() ;
+      Point p2 = arc->site() ;
+      Point p3 = arc->next->site() ;
+      Point center ;
+      double y31 = p3.y() - p1.y() ;
+      double x23 = p2.x() - p3.x() ;
+      double y23 = p2.y() - p3.y() ;
+      double x31 = p3.x() - p1.x() ; 
+      if ( (y23 * x31) - (y31 * x23) <= 0 ) {
+        return ; // Points in a line
+      } // if 
+      
+      double radius = findcircle(p1.x(), p1.y(), p2.x(), p2.y(), p3.x(), p3.y(), center) ;
+
+      dc_e.arc = arc ;
+      dc_e.circle_centre = center ;
+      dc_event.push_back(dc_e) ;
+
+    } // find_rest_cricle()
+
+    void deal_dc_event() {
+      size_t index = 0 ;
+      while ( dc_event.size() != 0 ) {
+        index = dc_pop() ;
+        handle_dc_event(dc_event[index]) ;
+        dc_event.erase(dc_event.begin()+index) ;
+      } // while 
+      
+    } // deal_dc_event()
+
+    size_t dc_pop() {
+      double temp = -10000 ;
+      size_t _index = 0 ;
+      for ( size_t i = 0 ; i < dc_event.size() ; i++ ) {
+        if ( temp < dc_event[i].circle_centre.y() ) {
+          temp = dc_event[i].circle_centre.y() ;
+          _index = i ;
+        } // if 
+      } // for 
+
+      return _index ;
+    } // dc_pop()
+
+    void handle_dc_event(delaunay_circle_event e) {
+      // to record adjacent_info
+      adjacent_info temp ;
+      temp.p1 = e.arc->prev->site() ;
+      temp.p2 = e.arc->site();
+      temp.p3 = e.arc->next->site();
+      temp.centre = e.circle_centre ;
+      temp.valid = true ;
+      temp.third = true ;
+      adj_list.push_back(temp) ;
+      e.arc->next->prev = e.arc->prev ;
+      e.arc->prev->next = e.arc->next ;
+      find_rest_cricle(e.arc->prev, -(bbox_ru.y() / 4)) ;
+      find_rest_cricle(e.arc->next, -(bbox_ru.y() / 4)) ;
+    } // handle_dc_event()
+
     void finish_edges() {
       // Advance the sweep line so no parabolas can cross the bounding box.
       double beachline = bbox_ru.y() / 4  ; 
-      adjacent_info temp ;
+
       // Extend each remaining segment to the new parabola intersections.
-      for (Arc *i = root ; i->next ; i = i->next)
+      for (Arc *i = root ; i->next ; i = i->next) {
           if (i->right_seg().done == false) { 
             i->right_seg().finish(intersection(i->site(), i->next->site(), -beachline), Output);
-            temp.p1 = i->site() ;
-            temp.p2 = i->next->site() ;
-            temp.valid = true ;
-            temp.third = false ;
-            adj_list.push_back(temp) ;
-          } // if   
+            find_rest_cricle(i,-(bbox_ru.y() / 4)) ;
+          } // if 
+      } // for      
       
     } // finish_edge()
 
@@ -510,6 +577,7 @@ class Voronoi {
     } // closet_point()
 
     vector<Seg> Create_delaunay() {
+      deal_dc_event() ;
       for ( size_t i = 0 ; i < adj_list.size() ; i++ ) {
         if ( adj_list[i].third )
           check_invalid_adj(adj_list[i].centre, i) ;

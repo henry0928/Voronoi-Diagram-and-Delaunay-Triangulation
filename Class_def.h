@@ -10,6 +10,7 @@ class Point ;
 class Seg ;
 class Arg ;
 class Event ;
+struct delaunay_circle_event ;
 
 
 class Point {
@@ -77,6 +78,7 @@ class Arc {
     Seg _right ;
 
   public:
+    delaunay_circle_event* dcc_event ; // since have too many same name!
     Event* event ;
     Arc* prev ;
     Arc* next ;
@@ -128,4 +130,9 @@ struct adjacent_info {
   Point centre ;
   bool valid ;
   bool third ;
+};
+
+struct delaunay_circle_event {
+  Arc * arc ;
+  Point circle_centre ;
 };
