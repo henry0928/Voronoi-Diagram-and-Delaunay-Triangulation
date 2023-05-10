@@ -1,70 +1,37 @@
 import _Voronoi
+import random
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.spatial import Voronoi, voronoi_plot_2d
 from scipy.spatial import Delaunay
 
-def setup_list1():
+def setup_list(count):
+    i = 0
     site_list = []
-    temp_point = _Voronoi.Point(3,23)
-    site_list.append(temp_point)
-    temp_point = _Voronoi.Point(9,23)
-    site_list.append(temp_point)
-    temp_point = _Voronoi.Point(13,8)
-    site_list.append(temp_point)
-    temp_point = _Voronoi.Point(5,16)
-    site_list.append(temp_point)
-    temp_point = _Voronoi.Point(18,21)
-    site_list.append(temp_point)
-    temp_point = _Voronoi.Point(22,11)
-    site_list.append(temp_point)
-    temp_point = _Voronoi.Point(27,18)
-    site_list.append(temp_point)
+    while i < count :
+        p = input("Point ( Need to be like this form -> \"18 21\" ) :" )
+        site_list.append(separate_string_to_point(p))
+        i = i + 1 
     return site_list
 
-def setup_list2():
+def random_setup_list(count):
     site_list = []
-    temp_point = _Voronoi.Point(5,5)
-    site_list.append(temp_point)
-    temp_point = _Voronoi.Point(5,10)
-    site_list.append(temp_point)
-    temp_point = _Voronoi.Point(10,5)
-    site_list.append(temp_point)
-    temp_point = _Voronoi.Point(10,10)
-    site_list.append(temp_point)
-    temp_point = _Voronoi.Point(15,5)
-    site_list.append(temp_point)
-    temp_point = _Voronoi.Point(15,10)
-    site_list.append(temp_point)
-    temp_point = _Voronoi.Point(5,15)
-    site_list.append(temp_point)
-    temp_point = _Voronoi.Point(10,15)
-    site_list.append(temp_point)
+    i = 0
+    while i < count :
+        x = float(random.randint(1,99))
+        y = float(random.randint(1,99))
+        site_list.append(_Voronoi.Point(x,y))
+        i = i + 1 
     return site_list
 
-def setup_list3():
-    site_list = []
-    temp_point = _Voronoi.Point(4,33)
-    site_list.append(temp_point)
-    temp_point = _Voronoi.Point(10,27)
-    site_list.append(temp_point)
-    temp_point = _Voronoi.Point(15,15)
-    site_list.append(temp_point)
-    temp_point = _Voronoi.Point(21,30)
-    site_list.append(temp_point)
-    temp_point = _Voronoi.Point(29,12)
-    site_list.append(temp_point)
-    temp_point = _Voronoi.Point(34,8)
-    site_list.append(temp_point)
-    temp_point = _Voronoi.Point(39,36)
-    site_list.append(temp_point)
-    temp_point = _Voronoi.Point(25,20)
-    site_list.append(temp_point)
-    temp_point = _Voronoi.Point(7,5)
-    site_list.append(temp_point)
-    temp_point = _Voronoi.Point(18,11)
-    site_list.append(temp_point)
-    return site_list
+def separate_string_to_point(str):
+    i = 0
+    while i < len(str) :
+        if str[i] == ' ':
+            x = float(str[:i])
+            y = float(str[i+1:])
+        i = i + 1
+    return _Voronoi.Point(x,y)
 
 def ans_voronoi_1():
     points = np.array([[3,23],[9,23],[13,8],
@@ -108,20 +75,41 @@ def ans_delaunay_3():
     plt.triplot(points[:,0], points[:,1], tri.simplices)
     plt.show()
 
-def Draw_diagram(input, bound, _list):
+def Draw_diagram(_input, bound, edge_list, voronoi):
     x_list = []
     y_list = []
-    for point in input:
+    for point in _input:
         x_list.append(point.x)
         y_list.append(point.y)
     x = np.array(x_list)
     y = np.array(y_list)
-    plt.plot([0,bound], [0,0], color="blue")
-    plt.plot([0,0], [0,bound], color="blue")
-    plt.plot([bound,bound], [0,bound], color="blue")
-    plt.plot([0,bound], [bound,bound], color="blue")
-    plt.plot(x,y,"ob")
-    for edge in _list:
+    plt.plot([0,bound], [0,0], color="black")
+    plt.plot([0,0], [0,bound], color="black")
+    plt.plot([bound,bound], [0,bound], color="black")
+    plt.plot([0,bound], [bound,bound], color="black")
+    shader = _Voronoi.Shader()
+    pixel_list = shader.Draw_color(_input)
+    if voronoi == 1:
+        for pixel in pixel_list:
+            pixel_x = pixel.p.x
+            pixel_y = pixel.p.y
+            if pixel.valid == 0:
+                if pixel.color % 7 == 0 :
+                    plt.plot(pixel_x, pixel_y,".", color='silver')
+                elif pixel.color % 7 == 1 :
+                    plt.plot(pixel_x, pixel_y,".", color='peachpuff')
+                elif pixel.color % 7 == 2 :
+                    plt.plot(pixel_x, pixel_y,".", color='lightgreen')
+                elif pixel.color % 7 == 3 :
+                    plt.plot(pixel_x, pixel_y,".", color='lightyellow')
+                elif pixel.color % 7 == 4 :
+                    plt.plot(pixel_x, pixel_y,".", color='lightblue')
+                elif pixel.color % 7 == 5 :
+                    plt.plot(pixel_x, pixel_y,".", color='lightpink')
+                else :
+                    plt.plot(pixel_x, pixel_y,".", color='mediumpurple')
+    plt.plot(x,y,"ok")
+    for edge in edge_list:
         start = edge.start
         end = edge.end
         p1 = [start.x, end.x]
@@ -130,26 +118,32 @@ def Draw_diagram(input, bound, _list):
     plt.show()
 
 if __name__== '__main__':
-    list1 = setup_list1()
-    list2 = setup_list2()
-    list3 = setup_list3()
+    # list1 = setup_list1()
+    # list2 = setup_list2()
+    # list3 = setup_list3()
     # test1
     # bbox_1 = _Voronoi.Point(0,0)
     # bbox_2 = _Voronoi.Point(30,30)
     # test2
-    bbox_1 = _Voronoi.Point(0,0)
-    bbox_2 = _Voronoi.Point(20,20)
-    # test3
     # bbox_1 = _Voronoi.Point(0,0)
-    # bbox_2 = _Voronoi.Point(40,40)
+    # bbox_2 = _Voronoi.Point(20,20)
+    # test3
+    bbox_1 = _Voronoi.Point(0,0)
+    bbox_2 = _Voronoi.Point(100,100)
+    s = input("random or specify:")
+    count = input("Number of site:")
+    if s == "random":
+        _list = random_setup_list(int(count))
+    else :
+        _list = setup_list(int(count))
 
     my_diagram = _Voronoi.Voronoi()
-    voronoi = my_diagram.Create_voronoi(list2, bbox_1, bbox_2)
-    Draw_diagram(list2, 20, voronoi)
-    ans_voronoi_2()
+    voronoi = my_diagram.Create_voronoi(_list, bbox_1, bbox_2)
+    Draw_diagram(_list, 100, voronoi, True)
+    # ans_voronoi_3()
     delaunay = my_diagram.Create_delaunay()
-    Draw_diagram(list2, 20, delaunay)
-    ans_delaunay_2()
+    Draw_diagram(_list, 100, delaunay, False)
+    # ans_delaunay_3()
 
 
 
@@ -202,3 +196,79 @@ if __name__== '__main__':
 #         p2 = [start.y, end.y]
 #         plt.plot(p1, p2, color="red")
 #     plt.show()
+
+# def setup_list1():
+#     site_list = []
+#     temp_point = _Voronoi.Point(3,23)
+#     site_list.append(temp_point)
+#     temp_point = _Voronoi.Point(9,23)
+#     site_list.append(temp_point)
+#     temp_point = _Voronoi.Point(13,8)
+#     site_list.append(temp_point)
+#     temp_point = _Voronoi.Point(5,16)
+#     site_list.append(temp_point)
+#     temp_point = _Voronoi.Point(18,21)
+#     site_list.append(temp_point)
+#     temp_point = _Voronoi.Point(22,11)
+#     site_list.append(temp_point)
+#     temp_point = _Voronoi.Point(27,18)
+#     site_list.append(temp_point)
+#     return site_list
+
+# def setup_list2():
+#     site_list = []
+#     temp_point = _Voronoi.Point(5,5)
+#     site_list.append(temp_point)
+#     temp_point = _Voronoi.Point(5,10)
+#     site_list.append(temp_point)
+#     temp_point = _Voronoi.Point(10,5)
+#     site_list.append(temp_point)
+#     temp_point = _Voronoi.Point(10,10)
+#     site_list.append(temp_point)
+#     temp_point = _Voronoi.Point(15,5)
+#     site_list.append(temp_point)
+#     temp_point = _Voronoi.Point(15,10)
+#     site_list.append(temp_point)
+#     temp_point = _Voronoi.Point(5,15)
+#     site_list.append(temp_point)
+#     temp_point = _Voronoi.Point(10,15)
+#     site_list.append(temp_point)
+#     return site_list
+
+# def setup_list3():
+#     site_list = []
+#     temp_point = _Voronoi.Point(4,33)
+#     site_list.append(temp_point)
+#     temp_point = _Voronoi.Point(10,27)
+#     site_list.append(temp_point)
+#     temp_point = _Voronoi.Point(15,15)
+#     site_list.append(temp_point)
+#     temp_point = _Voronoi.Point(21,30)
+#     site_list.append(temp_point)
+#     temp_point = _Voronoi.Point(29,12)
+#     site_list.append(temp_point)
+#     temp_point = _Voronoi.Point(34,8)
+#     site_list.append(temp_point)
+#     temp_point = _Voronoi.Point(39,36)
+#     site_list.append(temp_point)
+#     temp_point = _Voronoi.Point(25,20)
+#     site_list.append(temp_point)
+#     temp_point = _Voronoi.Point(7,5)
+#     site_list.append(temp_point)
+#     temp_point = _Voronoi.Point(18,11)
+#     site_list.append(temp_point)
+#     return site_list
+
+
+
+# pass test with 50 * 50 
+# deal on point:  (33,48)
+# deal on point:  (38,39)
+# deal on point:  (15,33)
+# deal on point:  (14,28)
+# deal on point:  (48,28)
+# deal on point:  (43,19)
+# deal on point:  (6,17)
+# deal on point:  (48,13)
+# deal on point:  (25,11)
+# deal on point:  (40,5)

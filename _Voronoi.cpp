@@ -1,4 +1,5 @@
-#include "Class_def.h"
+// #include "Class_def.h"
+#include "Draw_color.h"
 
 class Voronoi {
   private:
@@ -646,6 +647,14 @@ PYBIND11_MODULE(_Voronoi, m){
         .def( pybind11::init<>()) 
         .def_property_readonly("start", [](const Seg &s) { return s.start(); })
         .def_property_readonly("end", [](const Seg &s) { return s.end(); }) ;
+    pybind11::class_<Pixel>(m, "Pixel")
+        .def( pybind11::init<>()) 
+        .def_property_readonly("color", [](const Pixel &pixel) { return pixel.color; })
+        .def_property_readonly("p", [](const Pixel &pixel) { return pixel.p; })
+        .def_property_readonly("valid", [](const Pixel &pixel) { return pixel.valid; }) ;
+    pybind11::class_<Shader>(m, "Shader")
+        .def( pybind11::init<>()) 
+        .def( "Draw_color", &Shader::Distance_draw_color ) ;
     pybind11::class_<Voronoi>(m, "Voronoi")
         .def( pybind11::init<>())
         .def( "Create_voronoi", &Voronoi::Create_voronoi )
