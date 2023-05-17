@@ -260,15 +260,94 @@ if __name__== '__main__':
 #     return site_list
 
 
+# Still have bugs!
 
-# pass test with 50 * 50 
-# deal on point:  (33,48)
-# deal on point:  (38,39)
-# deal on point:  (15,33)
-# deal on point:  (14,28)
-# deal on point:  (48,28)
-# deal on point:  (43,19)
-# deal on point:  (6,17)
-# deal on point:  (48,13)
-# deal on point:  (25,11)
-# deal on point:  (40,5)
+# deal on point:  (9,91)
+# deal on point:  (10,86)
+# deal on point:  (84,82)
+# deal on point:  (40,78)
+# deal on point:  (44,56)
+# deal on point:  (49,55)
+# deal on point:  (80,52)
+# deal on point:  (71,45)
+# deal on point:  (3,41)
+# deal on point:  (70,39)
+# deal on point:  (92,20)
+# deal on point:  (84,17)
+# deal on point:  (1,11)
+# deal on point:  (7,9)
+# deal on point:  (63,5)
+
+# deal on point:  (49,96)
+# deal on point:  (65,96)
+# deal on point:  (89,90)
+# deal on point:  (57,89)
+# deal on point:  (7,81)
+# deal on point:  (34,69)
+# deal on point:  (87,67)
+# deal on point:  (48,60)
+# deal on point:  (78,56)
+# deal on point:  (57,35)
+# deal on point:  (31,33)
+# deal on point:  (94,28)
+# deal on point:  (45,10)
+# deal on point:  (8,9)
+# deal on point:  (22,6)
+
+
+# PERFECT with 100*100 15 site
+
+# NO:1
+
+# deal on point:  (77,95)
+# deal on point:  (87,88)
+# deal on point:  (16,86)
+# deal on point:  (66,77)
+# deal on point:  (13,75)
+# deal on point:  (34,74)
+# deal on point:  (22,72)
+# deal on point:  (37,66)
+# deal on point:  (4,61)
+# deal on point:  (82,48)
+# deal on point:  (94,42)
+# deal on point:  (58,23)
+# deal on point:  (93,20)
+# deal on point:  (30,10)
+# deal on point:  (64,6)
+
+# NO:2
+
+# deal on point:  (49,94)
+# deal on point:  (73,93)
+# deal on point:  (36,84)
+# deal on point:  (68,81)
+# deal on point:  (63,70)
+# deal on point:  (49,55)
+# deal on point:  (91,47)
+# deal on point:  (74,47)
+# deal on point:  (58,46)
+# deal on point:  (28,46)
+# deal on point:  (51,40)
+# deal on point:  (81,22)
+# deal on point:  (20,12)
+# deal on point:  (15,10)
+# deal on point:  (33,7)
+
+# NO:3
+
+# deal on point:  (65,99)
+# deal on point:  (63,96)
+# deal on point:  (26,93)
+# deal on point:  (41,66)
+# deal on point:  (49,60)
+# deal on point:  (39,58)
+# deal on point:  (55,50)
+# deal on point:  (19,50)
+# deal on point:  (71,47)
+# deal on point:  (83,46)
+# deal on point:  (80,45)
+# deal on point:  (75,39)
+# deal on point:  (28,32)
+# deal on point:  (13,10)
+# deal on point:  (93,6)
+

@@ -32,6 +32,13 @@ class Point {
       else
         return false ;
     } // equal()
+
+    bool operator!=( const Point & other ) {
+      if ( other.x() != this->x() || other.y() != this->y() )
+        return true ;
+      else
+        return false ;
+    } // equal()
     double & x() { return _x ; }
     const double & x() const { return _x ; } 
     const double & return_x() const { return _x ; } 
