@@ -16,13 +16,16 @@ def setup_list(count):
 
 def random_setup_list(count):
     site_list = []
+    scipy_site_list = []
     i = 0
     while i < count :
         x = float(random.randint(1,99))
         y = float(random.randint(1,99))
+        scipy_input = [x,y]
+        scipy_site_list.append(scipy_input)
         site_list.append(_Voronoi.Point(x,y))
         i = i + 1 
-    return site_list
+    return site_list, scipy_site_list
 
 def separate_string_to_point(str):
     i = 0
@@ -33,49 +36,19 @@ def separate_string_to_point(str):
         i = i + 1
     return _Voronoi.Point(x,y)
 
-def ans_voronoi_1():
-    points = np.array([[3,23],[9,23],[13,8],
-                       [5,16],[18,21],[22,11],[27,18]])
+def Draw_scipy_voronoi(_list,ax):
+    # plt.title('Scipy Voronoi')
+    points = np.array(_list)
     vor = Voronoi(points)
-    fig = voronoi_plot_2d(vor)
-    plt.show()
+    fig = voronoi_plot_2d(vor,ax)
 
-def ans_delaunay_1():
-    points = np.array([[3,23],[9,23],[13,8],
-                       [5,16],[18,21],[22,11],[27,18]])
+def Draw_scipy_delaunay(_list,ax):
+    # plt.title('Scipy Delaunay')
+    points = np.array(_list)
     tri = Delaunay(points)
-    plt.triplot(points[:,0], points[:,1], tri.simplices)
-    plt.show()
+    ax.triplot(points[:,0], points[:,1], tri.simplices)
 
-def ans_voronoi_2():
-    points = np.array([[5,5],[5,10],[10,5],[10,10],
-                       [15,5],[15,10],[5,15],[10,15]])
-    vor = Voronoi(points)
-    fig = voronoi_plot_2d(vor)
-    plt.show()
-
-def ans_delaunay_2():
-    points = np.array([[5,5],[5,10],[10,5],[10,10],
-                       [15,5],[15,10],[5,15],[10,15]])
-    tri = Delaunay(points)
-    plt.triplot(points[:,0], points[:,1], tri.simplices)
-    plt.show()
-
-def ans_voronoi_3():
-    points = np.array([[4,33],[10,27],[15,15],[21,30],[29,12],
-                       [34,8],[39,36],[25,20],[7,5],[18,11]])
-    vor = Voronoi(points)
-    fig = voronoi_plot_2d(vor)
-    plt.show()
-
-def ans_delaunay_3():
-    points = np.array([[4,33],[10,27],[15,15],[21,30],[29,12],
-                       [34,8],[39,36],[25,20],[7,5],[18,11]])
-    tri = Delaunay(points)
-    plt.triplot(points[:,0], points[:,1], tri.simplices)
-    plt.show()
-
-def Draw_diagram(_input, bound, edge_list, voronoi):
+def Draw_diagram(_input, bound, edge_list, voronoi, ax):
     x_list = []
     y_list = []
     for point in _input:
@@ -83,39 +56,42 @@ def Draw_diagram(_input, bound, edge_list, voronoi):
         y_list.append(point.y)
     x = np.array(x_list)
     y = np.array(y_list)
-    plt.plot([0,bound], [0,0], color="black")
-    plt.plot([0,0], [0,bound], color="black")
-    plt.plot([bound,bound], [0,bound], color="black")
-    plt.plot([0,bound], [bound,bound], color="black")
+    ax.plot([0,bound], [0,0], color="black")
+    ax.plot([0,0], [0,bound], color="black")
+    ax.plot([bound,bound], [0,bound], color="black")
+    ax.plot([0,bound], [bound,bound], color="black")
     shader = _Voronoi.Shader()
     pixel_list = shader.Draw_color(_input)
     if voronoi == 1:
+        # plt.title('My Voronoi')
         for pixel in pixel_list:
             pixel_x = pixel.p.x
             pixel_y = pixel.p.y
             if pixel.valid == 0:
                 if pixel.color % 7 == 0 :
-                    plt.plot(pixel_x, pixel_y,".", color='silver')
+                    ax.plot(pixel_x, pixel_y,".", color='silver')
                 elif pixel.color % 7 == 1 :
-                    plt.plot(pixel_x, pixel_y,".", color='peachpuff')
+                    ax.plot(pixel_x, pixel_y,".", color='peachpuff')
                 elif pixel.color % 7 == 2 :
-                    plt.plot(pixel_x, pixel_y,".", color='lightgreen')
+                    ax.plot(pixel_x, pixel_y,".", color='lightgreen')
                 elif pixel.color % 7 == 3 :
-                    plt.plot(pixel_x, pixel_y,".", color='lightyellow')
+                    ax.plot(pixel_x, pixel_y,".", color='lightyellow')
                 elif pixel.color % 7 == 4 :
-                    plt.plot(pixel_x, pixel_y,".", color='lightblue')
+                    ax.plot(pixel_x, pixel_y,".", color='lightblue')
                 elif pixel.color % 7 == 5 :
-                    plt.plot(pixel_x, pixel_y,".", color='lightpink')
+                    ax.plot(pixel_x, pixel_y,".", color='lightpink')
                 else :
-                    plt.plot(pixel_x, pixel_y,".", color='mediumpurple')
-    plt.plot(x,y,"ok")
+                    ax.plot(pixel_x, pixel_y,".", color='mediumpurple')
+    # else:
+    #     plt.title('My Delaunay')
+    ax.plot(x,y,"ok")
     for edge in edge_list:
         start = edge.start
         end = edge.end
         p1 = [start.x, end.x]
         p2 = [start.y, end.y]
-        plt.plot(p1, p2, color="red")
-    plt.show()
+        # plt.plot(p1, p2, color="red")
+        ax.plot(p1, p2, color="red")
 
 if __name__== '__main__':
     # list1 = setup_list1()
@@ -128,23 +104,28 @@ if __name__== '__main__':
     # bbox_1 = _Voronoi.Point(0,0)
     # bbox_2 = _Voronoi.Point(20,20)
     # test3
+    fig = plt.figure()
+    ax1 = fig.add_subplot(2,2,1)
+    ax2 = fig.add_subplot(2,2,2)
+    ax3 = fig.add_subplot(2,2,3)
+    ax4 = fig.add_subplot(2,2,4)
     bbox_1 = _Voronoi.Point(0,0)
     bbox_2 = _Voronoi.Point(100,100)
     s = input("random or specify:")
     count = input("Number of site:")
     if s == "random":
-        _list = random_setup_list(int(count))
+        _list, _scipy_list = random_setup_list(int(count))
     else :
         _list = setup_list(int(count))
 
     my_diagram = _Voronoi.Voronoi()
     voronoi = my_diagram.Create_voronoi(_list, bbox_1, bbox_2)
-    Draw_diagram(_list, 100, voronoi, True)
-    # ans_voronoi_3()
+    Draw_diagram(_list, 100, voronoi, True, ax1)
+    Draw_scipy_voronoi(_scipy_list, ax2)
     delaunay = my_diagram.Create_delaunay()
-    Draw_diagram(_list, 100, delaunay, False)
-    # ans_delaunay_3()
-
+    Draw_diagram(_list, 100, delaunay, False, ax3)
+    Draw_scipy_delaunay(_scipy_list, ax4)
+    plt.show()
 
 
                                     # Backup function!!
