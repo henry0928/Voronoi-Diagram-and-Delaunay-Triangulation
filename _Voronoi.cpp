@@ -1,5 +1,7 @@
-// #include "Class_def.h"
-#include "Draw_color.h"
+#include "include.h"
+#include <pybind11/pybind11.h>
+#include <pybind11/operators.h>
+#include <pybind11/stl.h>
 
 class Voronoi {
   private:
@@ -13,6 +15,7 @@ class Voronoi {
     Arc * root ; // This is beachline head pointer
     Point bbox_ld ;
     Point bbox_ru ;
+    //vector<Point> site_list ;
 
   public:
     Voronoi() :root(NULL) {} 
@@ -24,6 +27,7 @@ class Voronoi {
       answer.clear() ;
       adj_list.clear() ;
       delaunay_edge.clear() ;
+      //site_list.clear() ;
       root = NULL ;
       Event temp ;
       for( size_t i = 0 ; i < site_list.size() ; i++ ) {
@@ -89,7 +93,7 @@ class Voronoi {
     } // que_pop()
 
     void handle_site( Event n_event ) {
-      print_point(n_event.pos(), "deal on point:") ;
+      //site_list.push_back(n_event.pos()) ;
       Point interset_point ;
       Point zz ;
       Point start ;
@@ -673,12 +677,29 @@ PYBIND11_MODULE(_Voronoi, m){
     m.doc() = "pybind11 Voronoi";
     pybind11::class_<Point>(m, "Point")
         .def( pybind11::init<double, double>()) 
+        .def( "Point_equal", &Point::Point_equal )
         .def_property_readonly("x", [](const Point &p) { return p.x(); })
         .def_property_readonly("y", [](const Point &p) { return p.y(); }) ;
     pybind11::class_<Seg>(m, "Seg")
-        .def( pybind11::init<>()) 
+        .def( pybind11::init<>())
+        .def( pybind11::init<Point, Point>()) 
+        .def( "Seg_equal", &Seg::Seg_equal )
         .def_property_readonly("start", [](const Seg &s) { return s.start(); })
         .def_property_readonly("end", [](const Seg &s) { return s.end(); }) ;
+    pybind11::class_<Arc>(m, "Arc")
+        .def( pybind11::init<>())
+        .def( pybind11::init<Point, Seg, Seg>()) 
+        .def_property_readonly("site", [](const Arc &a) { return a.site(); }) 
+        .def_property_readonly("left_seg", [](const Arc &a) { return a.left_seg(); }) 
+        .def_property_readonly("right_seg", [](const Arc &a) { return a.right_seg(); }) 
+        .def_property_readonly("next", [](const Arc &a) { return a.next; }) 
+        .def_property_readonly("prev", [](const Arc &a) { return a.prev; }) ;
+    pybind11::class_<Event>(m, "Event")
+        .def( pybind11::init<>()) 
+        .def_property_readonly("pos", [](const Event &e) { return e.pos(); }) 
+        .def_property_readonly("type", [](const Event &e) { return e.type(); })
+        .def_property_readonly("valid", [](const Event &e) { return e.valid(); }) 
+        .def_property_readonly("circle_centre", [](const Event &e) { return e.circle_centre(); }) ; 
     pybind11::class_<Pixel>(m, "Pixel")
         .def( pybind11::init<>()) 
         .def_property_readonly("color", [](const Pixel &pixel) { return pixel.color; })
@@ -686,10 +707,10 @@ PYBIND11_MODULE(_Voronoi, m){
         .def_property_readonly("valid", [](const Pixel &pixel) { return pixel.valid; }) ;
     pybind11::class_<Shader>(m, "Shader")
         .def( pybind11::init<>()) 
-        .def( "Draw_color", &Shader::Distance_draw_color ) ;
+        .def( "Draw_color", &Shader::Distance_draw_color )
+        .def( "getter_pixel", &Shader::getter_pixel ) ;
     pybind11::class_<Voronoi>(m, "Voronoi")
         .def( pybind11::init<>())
         .def( "Create_voronoi", &Voronoi::Create_voronoi )
         .def( "Create_delaunay", &Voronoi::Create_delaunay ) ;
-
 }
