@@ -12,6 +12,7 @@ class Voronoi {
     vector<adjacent_info> adj_list ; // for record adjacent infomation
     vector<Seg> delaunay_edge ;
     vector<delaunay_circle_event> dc_event ; // for record delaunay circle event
+    vector<Point> voronoi_cell ;
     Arc * root ; // This is beachline head pointer
     Point bbox_ld ;
     Point bbox_ru ;
@@ -27,7 +28,7 @@ class Voronoi {
       answer.clear() ;
       adj_list.clear() ;
       delaunay_edge.clear() ;
-      //site_list.clear() ;
+      voronoi_cell.clear() ;
       root = NULL ;
       Event temp ;
       for( size_t i = 0 ; i < site_list.size() ; i++ ) {
@@ -238,6 +239,7 @@ class Voronoi {
       if ( check_invalid_circle(n_event.circle_centre()) ) {
         return ;
       } // if 
+      voronoi_cell.push_back(n_event.circle_centre()) ;
       // Remove the arc from the beachline
       Arc * rm_ptr = n_event.arc ;
       rm_ptr->prev->next = rm_ptr->next ;
@@ -400,7 +402,7 @@ class Voronoi {
       
       findcircle(p1.x(), p1.y(), p2.x(), p2.y(), p3.x(), p3.y(), center) ;
       if ( center.y() >= 0 && center.x() >= 0 )  {
-
+        voronoi_cell.push_back(center) ;
         arc->next->prev = arc->prev ;
         arc->prev->next = arc->next ;
         if ( arc->left_seg().done == false )
@@ -670,6 +672,8 @@ class Voronoi {
       } // for 
 
     } // debug_output
+
+    vector<Point> debug_voronoi_cell() { return voronoi_cell ; } 
  
 }; // Voronoi
 
@@ -712,5 +716,6 @@ PYBIND11_MODULE(_Voronoi, m){
     pybind11::class_<Voronoi>(m, "Voronoi")
         .def( pybind11::init<>())
         .def( "Create_voronoi", &Voronoi::Create_voronoi )
-        .def( "Create_delaunay", &Voronoi::Create_delaunay ) ;
+        .def( "Create_delaunay", &Voronoi::Create_delaunay )
+        .def( "debug_voronoi_cell", &Voronoi::debug_voronoi_cell ) ;
 }

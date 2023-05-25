@@ -68,4 +68,41 @@ def test_Shader():
     assert pixel1.p.Point_equal(p1) == True
     assert pixel2.p.Point_equal(p2) == True
 
+def test_Voronoi():
+    test_voronoi = _Voronoi.Voronoi()
+    _list, scipy_list = make_sitelist(14)
+    bbox_1 = _Voronoi.Point(0,0)
+    bbox_2 = _Voronoi.Point(100,100)
+    voronoi = test_voronoi.Create_voronoi(_list, bbox_1, bbox_2)
+    test_list = test_voronoi.debug_voronoi_cell()
+    points = np.array(scipy_list)
+    vor = Voronoi(points)
+    ans_array = vor.vertices
+    i = 0
+    fix_scipy_list = []
+    fix_test_list = []
+    for point in test_list :
+        if point.x > 0 and point.y > 0 :
+            p = [point.x, point.y]
+            fix_test_list.append(p)
+    test_array = np.array(fix_test_list)
+    while i < (ans_array.size/2) :
+        if ans_array[i][0] > 0 and ans_array[i][1] > 0 :
+            temp = [ans_array[i][0], ans_array[i][1]]
+            fix_scipy_list.append(temp)
+        i = i + 1
+    scipy_array = np.array(fix_scipy_list)
+    assert test_array.size == scipy_array.size
+
+    sorted_test = sorted(fix_test_list, key=lambda test: test[1])
+    sorted_scipy = sorted(fix_scipy_list, key=lambda scipy: scipy[1])
+
+    index = 0
+    while index < len(sorted_test):
+        assert ( sorted_test[index][0] - sorted_scipy[index][0] ) < 1.5
+        assert ( sorted_test[index][1] - sorted_scipy[index][1] ) < 1.5
+        index = index + 1 
+
+
+
     
