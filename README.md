@@ -78,6 +78,25 @@ Edge Voronoi(vector<Point> site_list, Point bb_point1, Point bb_point2 )
 
 ( If it is found that the API needs to be added during the development process, I will modify this part again. )
 
+# Testing
+`test_Point():`<br>
+Testing the basic functions of the `Point` data structure
+
+`test_Seg():`<br>
+Testing the basic functions of the `Seg` data structure and Determine the correctness of the slope calculation
+
+`test_Arc():`<br>
+Testing the basic functions of the `Arc` data structure
+
+`test_Event():`<br>
+Testing the basic functions of the `Event` data structure
+
+`test_Shader():`<br>
+Test whether the shader can give different colors according t odifferent pixels
+
+`test_Voronoi:`<br>
+Test the correctness of the voronoi diagram. Complete the test by comparing the `voronoi cell` in the `voronoi diagram`.
+
 # Engineering Infrastructure
 - Build: `make`
 - Version control: `git`
