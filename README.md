@@ -53,11 +53,28 @@ finish any remaining edges
 
 Anyone who wants to generate Voronoi Diagram and Delaunay Triangulation.
 
+# Build System
+
+``` makefile 
+make build 
+``` 
+Build the whole system. Compile “_Voronoi.cpp” and other object file to make shared library “_Voronoi.so”.
+
+``` makefile 
+make demo 
+``` 
+Select matplotlib as the graphing tool to draw Voronoi Diagram and Delaunay Triangulation. Also use the spatial module in scipy to draw voronoi diagram and Delaunay Triangulation for comparing.
+
+``` makefile 
+make test 
+``` 
+Test functionality and correctness.
+
 # System Architecture
 
 This is a software system of a hybrid system of C++11 (modern C++) and Python.
 - Use `Python` to read input (target points, the boundary of the planar graph) and show results.
-- Use `C++` to implement "Fortune's Algorithm" and then generate Voronoi Diagram.
+- Use `C++` to implement "Fortune's Algorithm" and then generate Voronoi Diagram and use Voronoi Diagram to generate Delaunay Triangulation.
 - Use `Pybind11` to wrap C++ functions for Python.
 
 # API Description
@@ -66,14 +83,9 @@ This is a software system of a hybrid system of C++11 (modern C++) and Python.
 
 `Python` API: <br>
 ``` py 
-def Create_diagram(site_list, bb_point1, bb_point2) # Input the site's list and bounding box points to get the Voronoi Diagram as the result_diagram 
-def Draw_diagram(result_diagram) # Draw the result diagram
-```
-`Voronoi()` will get the edge information of Voronoi Diagram, user can use this function to get the edge information rathen than the complete graph. 
-
-`C++` API: <br>
-``` cpp
-Edge Voronoi(vector<Point> site_list, Point bb_point1, Point bb_point2 )
+def Create_voronoi(site_list, bbox_1, bbox_2) # Create Voronoi Diagram with bounding box by fortune algorithm.
+def Create_Delaunay() # Use Voronoi Diagram to produce Delaunay Triangulation.
+def Draw_diagram(site_list, bound, edge_list, voronoi/Delaunay) # Draw out Voronoi Diagram or Delaunay Triangulation.
 ```
 
 ( If it is found that the API needs to be added during the development process, I will modify this part again. )
@@ -95,7 +107,7 @@ Testing the basic functions of the `Event` data structure
 Test whether the shader can give different colors according t odifferent pixels
 
 `test_Voronoi:`<br>
-Test the correctness of the voronoi diagram. Complete the test by comparing the `voronoi cell` in the `voronoi diagram`.
+Test the correctness of the voronoi diagram. Complete the test by comparing the `voronoi cell` in the `voronoi diagram`
 
 # Engineering Infrastructure
 - Build: `make`
@@ -124,3 +136,7 @@ Test the correctness of the voronoi diagram. Complete the test by comparing the 
     - Documentation and buffer for previous weeks
 - Week 8 (5/29)
     - Prepare for presentation 
+
+
+# Result of Demo
+
