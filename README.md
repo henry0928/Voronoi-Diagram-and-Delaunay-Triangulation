@@ -140,3 +140,4 @@ Test the correctness of the voronoi diagram. Complete the test by comparing the 
 
 # Result of Demo
 
+![image](https://github.com/henry0928/Voronoi-Diagram-and-Delaunay-Triangulation/blob/main/result.png)
