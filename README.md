@@ -1,6 +1,11 @@
 # Voronoi Diagram and Delaunay Triangulation
 
 GitHub repository : https://github.com/henry0928/Voronoi-Diagram-and-Delaunay-Triangulation
+
+# Preview of Result
+
+![image](https://github.com/henry0928/Voronoi-Diagram-and-Delaunay-Triangulation/blob/main/result.png)
+
 # Basic Information
 
 To put it simply, `Voronoi Diagram` is a kind of graphic segmentation. There will be many specific points on a planar graph. The collection of these specific points is called "A". All the points on the planar graph will go to "A" to find the specific point closest to itself, and form an independent area with the specific point. Then, the planar graph can be divided into various independent areas by using specific points to form a voronoi diagram.
@@ -136,8 +141,3 @@ Test the correctness of the voronoi diagram. Complete the test by comparing the 
     - Documentation and buffer for previous weeks
 - Week 8 (5/29)
     - Prepare for presentation 
-
-
-# Result of Demo
-
-![image](https://github.com/henry0928/Voronoi-Diagram-and-Delaunay-Triangulation/blob/main/result.png)
